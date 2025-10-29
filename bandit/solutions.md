@@ -287,3 +287,75 @@ screen -r
 `bandit21: EeoULMCra2q0dSkYj561DX7s1CpBuOBt`
 
 ## 21
+
+In this challenge, we find out that a cron is copying the bandit22 password into a temp file every minute.
+
+```
+cd /etc/cron.d
+vi cronjob_bandit22
+vi /usr/bin/cronjob_bandit22.sh
+cat /tmp/t7O6lds9S0RqQh9aMcz6ShpAoZKF7fgv
+```
+
+`bandit22: tRae0UfB9v0UzbCdn9cY0gQnds9GF58Q`
+
+## 22
+
+Similar to 21, a cron is running every minute copying the password to a temp file for bandit23, but the temp file is obscured.
+
+```
+cd /etc/cron.d
+vi cronjob_bandit23
+vi /usr/bin/cronjob_bandit23.sh
+echo I am user bandit23 | md5sum | cut -d ' ' -f 1
+cat /tmp/8ca319486bfbbc3663ea0fbe81326349
+```
+
+`bandit23: 0Zf11ioIjMVN551jX3CmStKLYqjk54Ga`
+
+## 23
+
+```
+cd /etc/cron.d
+vi cronjob_bandit24
+vi /usr/bin/cronjob_bandit24.sh
+```
+
+In `/usr/bin/cronjob_bandit24.sh`:
+
+```
+#!/bin/bash
+
+myname=$(whoami)
+
+cd /var/spool/$myname/foo
+echo "Executing and deleting all scripts in /var/spool/$myname/foo:"
+for i in * .*;
+do
+    if [ "$i" != "." -a "$i" != ".." ];
+    then
+        echo "Handling $i"
+        owner="$(stat --format "%U" ./$i)"
+        if [ "${owner}" = "bandit23" ]; then
+            timeout -s 9 60 ./$i
+        fi
+        rm -f ./$i
+    fi
+done
+```
+
+It is executing all scripts in `/var/spool/bandit24` owned by `bandit23`.
+
+```
+cd /var/spool/
+ls -la
+```
+
+We can see this directory has a subdirectory `foo` which we can write to (but not read from).
+
+It may be helpful to work in a temp directory so we can copy the script since it gets deleted every cron:
+
+```
+cd $(mktemp -d)
+```
+
